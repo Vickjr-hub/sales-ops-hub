@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Pencil, Trash2, Plus, FileText } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/payroll")({
@@ -156,25 +156,15 @@ function EntryDialog({ open, onOpenChange, editing, rates }: {
     rep_name: "", raw_lines: 0, activated_lines: 0, internet_sales: 0, directv_sales: 0,
   });
 
-  // reset on open
-  useState(() => {});
-  if (open && editing && form.rep_name !== editing.rep_name && form !== (editing as any)) {
-    // noop — handled below via effect-like pattern using key would be cleaner; using simple sync
-  }
-
-  // sync when editing changes
-  const editingId = editing?.id ?? null;
-  // simple effect via useState pattern
-  if ((open as any)._mark !== editingId) {
-    (open as any)._mark = editingId;
+  useEffect(() => {
+    if (!open) return;
     if (editing) {
       const { id: _id, gross_commission: _g, ...rest } = editing;
-      // schedule sync
-      Promise.resolve().then(() => setForm(rest));
+      setForm(rest);
     } else {
-      Promise.resolve().then(() => setForm({ rep_name: "", raw_lines: 0, activated_lines: 0, internet_sales: 0, directv_sales: 0 }));
+      setForm({ rep_name: "", raw_lines: 0, activated_lines: 0, internet_sales: 0, directv_sales: 0 });
     }
-  }
+  }, [open, editing]);
 
   const save = useMutation({
     mutationFn: async () => {
