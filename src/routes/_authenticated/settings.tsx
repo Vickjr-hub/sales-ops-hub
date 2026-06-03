@@ -46,10 +46,28 @@ function SettingsPage() {
         const { error } = await supabase.from("settings").insert(form);
         if (error) throw error;
       }
+      // Recalculate every payroll entry with the new rates.
+      const { data: entries, error: eErr } = await supabase
+        .from("payroll_entries")
+        .select("id, activated_lines, internet_sales, directv_sales");
+      if (eErr) throw eErr;
+      for (const e of entries ?? []) {
+        const gross =
+          Number(e.activated_lines) * form.phone_line_rate +
+          Number(e.internet_sales) * form.internet_rate +
+          Number(e.directv_sales) * form.directv_rate;
+        const { error: uErr } = await supabase
+          .from("payroll_entries")
+          .update({ gross_commission: gross })
+          .eq("id", e.id);
+        if (uErr) throw uErr;
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["settings"] });
-      toast.success("Settings saved");
+      qc.invalidateQueries({ queryKey: ["payroll"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-summary"] });
+      toast.success("Settings saved. Payroll recalculated.");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -57,7 +75,7 @@ function SettingsPage() {
   return (
     <div className="max-w-xl">
       <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-      <p className="text-muted-foreground mt-1">Update commission rates used in payroll.</p>
+      <p className="text-muted-foreground mt-1">Update commission rates. Existing payroll recalculates automatically.</p>
 
       <form
         onSubmit={(e) => { e.preventDefault(); save.mutate(); }}
@@ -81,7 +99,9 @@ function SettingsPage() {
             onChange={(e) => setForm({ ...form, directv_rate: Number(e.target.value) })} />
           <p className="text-xs text-muted-foreground">Paid per DirectTV sale.</p>
         </div>
-        <Button type="submit" className="h-11 w-full" disabled={save.isPending}>Save Changes</Button>
+        <Button type="submit" className="h-11 w-full" disabled={save.isPending}>
+          {save.isPending ? "Saving..." : "Save Changes"}
+        </Button>
       </form>
     </div>
   );
