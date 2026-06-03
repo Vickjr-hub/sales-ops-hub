@@ -14,7 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      applicants: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          notes: string | null
+          phone: string | null
+          status: Database["public"]["Enums"]["applicant_status"]
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          status?: Database["public"]["Enums"]["applicant_status"]
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          status?: Database["public"]["Enums"]["applicant_status"]
+        }
+        Relationships: []
+      }
+      payroll_entries: {
+        Row: {
+          activated_lines: number
+          created_at: string
+          directv_sales: number
+          gross_commission: number
+          id: string
+          internet_sales: number
+          raw_lines: number
+          rep_name: string
+        }
+        Insert: {
+          activated_lines?: number
+          created_at?: string
+          directv_sales?: number
+          gross_commission?: number
+          id?: string
+          internet_sales?: number
+          raw_lines?: number
+          rep_name: string
+        }
+        Update: {
+          activated_lines?: number
+          created_at?: string
+          directv_sales?: number
+          gross_commission?: number
+          id?: string
+          internet_sales?: number
+          raw_lines?: number
+          rep_name?: string
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          directv_rate: number
+          id: string
+          internet_rate: number
+          phone_line_rate: number
+        }
+        Insert: {
+          directv_rate?: number
+          id?: string
+          internet_rate?: number
+          phone_line_rate?: number
+        }
+        Update: {
+          directv_rate?: number
+          id?: string
+          internet_rate?: number
+          phone_line_rate?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +106,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      applicant_status:
+        | "Applied"
+        | "Interview Scheduled"
+        | "Interview Completed"
+        | "Hired"
+        | "Rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +238,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      applicant_status: [
+        "Applied",
+        "Interview Scheduled",
+        "Interview Completed",
+        "Hired",
+        "Rejected",
+      ],
+    },
   },
 } as const
