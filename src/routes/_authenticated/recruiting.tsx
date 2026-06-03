@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Pencil, Trash2, CalendarClock, CheckCircle2, UserCheck, UserX } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { format, parseISO } from "date-fns";
+import { DatePickerField } from "@/components/DatePickerField";
 
 export const Route = createFileRoute("/_authenticated/recruiting")({
   head: () => ({ meta: [{ title: "Recruiting — Operator" }] }),
@@ -28,12 +29,35 @@ type Applicant = {
   email: string | null;
   notes: string | null;
   status: Status;
+  interview_date: string | null;
+  interview_time: string | null;
 };
+
+const STATUS_VARIANTS: Record<Status, string> = {
+  "Applied": "bg-muted text-foreground",
+  "Interview Scheduled": "bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-200",
+  "Interview Completed": "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
+  "Hired": "bg-green-100 text-green-900 dark:bg-green-950 dark:text-green-200",
+  "Rejected": "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200",
+};
+
+function fmtInterview(d: string | null, t: string | null) {
+  if (!d) return "—";
+  try {
+    const datePart = format(parseISO(d), "MMM d, yyyy");
+    if (!t) return datePart;
+    const [h, m] = t.split(":");
+    const dt = new Date();
+    dt.setHours(Number(h), Number(m), 0);
+    return `${datePart} • ${format(dt, "h:mm a")}`;
+  } catch { return d; }
+}
 
 function RecruitingPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Applicant | null>(null);
+  const [scheduleFor, setScheduleFor] = useState<Applicant | null>(null);
 
   const { data: applicants = [] } = useQuery({
     queryKey: ["applicants"],
@@ -49,10 +73,12 @@ function RecruitingPage() {
       const { error } = await supabase.from("applicants").update({ status }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_d, v) => {
       qc.invalidateQueries({ queryKey: ["applicants"] });
       qc.invalidateQueries({ queryKey: ["dashboard-summary"] });
+      toast.success(`Marked as ${v.status}`);
     },
+    onError: (e: any) => toast.error(e.message),
   });
 
   const del = useMutation({
@@ -72,7 +98,7 @@ function RecruitingPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Recruiting</h1>
-          <p className="text-muted-foreground mt-1">Track applicants and hiring progress.</p>
+          <p className="text-muted-foreground mt-1">Track applicants and schedule interviews.</p>
         </div>
         <Button className="h-11" onClick={() => { setEditing(null); setOpen(true); }}>
           <Plus className="h-4 w-4 mr-2" /> Add Applicant
@@ -85,10 +111,10 @@ function RecruitingPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Interview</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="w-24"></TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -98,20 +124,28 @@ function RecruitingPage() {
               {applicants.map((a) => (
                 <TableRow key={a.id}>
                   <TableCell className="font-medium">{a.full_name}</TableCell>
-                  <TableCell className="text-muted-foreground">{a.phone || "—"}</TableCell>
-                  <TableCell className="text-muted-foreground">{a.email || "—"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    <div>{a.phone || "—"}</div>
+                    <div className="text-xs">{a.email || ""}</div>
+                  </TableCell>
+                  <TableCell className="text-sm whitespace-nowrap">{fmtInterview(a.interview_date, a.interview_time)}</TableCell>
                   <TableCell>
-                    <Select value={a.status} onValueChange={(v) => updateStatus.mutate({ id: a.id, status: v as Status })}>
-                      <SelectTrigger className="w-48">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
+                    <Badge variant="secondary" className={STATUS_VARIANTS[a.status]}>{a.status}</Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-1 justify-end">
+                    <div className="flex gap-1 justify-end flex-wrap">
+                      <Button size="sm" variant="outline" onClick={() => setScheduleFor(a)}>
+                        <CalendarClock className="h-4 w-4 mr-1" /> Schedule
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => updateStatus.mutate({ id: a.id, status: "Interview Completed" })}>
+                        <CheckCircle2 className="h-4 w-4 mr-1" /> Complete
+                      </Button>
+                      <Button size="sm" variant="default" onClick={() => updateStatus.mutate({ id: a.id, status: "Hired" })}>
+                        <UserCheck className="h-4 w-4 mr-1" /> Hire
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => updateStatus.mutate({ id: a.id, status: "Rejected" })}>
+                        <UserX className="h-4 w-4 mr-1" /> Reject
+                      </Button>
                       <Button size="icon" variant="ghost" onClick={() => { setEditing(a); setOpen(true); }}>
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -128,7 +162,67 @@ function RecruitingPage() {
       </div>
 
       <ApplicantDialog open={open} onOpenChange={setOpen} editing={editing} />
+      <ScheduleDialog applicant={scheduleFor} onClose={() => setScheduleFor(null)} />
     </div>
+  );
+}
+
+function ScheduleDialog({ applicant, onClose }: { applicant: Applicant | null; onClose: () => void }) {
+  const qc = useQueryClient();
+  const [date, setDate] = useState<string | null>(null);
+  const [time, setTime] = useState<string>("09:00");
+
+  useEffect(() => {
+    if (applicant) {
+      setDate(applicant.interview_date);
+      setTime(applicant.interview_time?.slice(0, 5) ?? "09:00");
+    }
+  }, [applicant]);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      if (!applicant) return;
+      if (!date) throw new Error("Please select an interview date");
+      if (!time) throw new Error("Please select an interview time");
+      const { error } = await supabase
+        .from("applicants")
+        .update({ interview_date: date, interview_time: time, status: "Interview Scheduled" })
+        .eq("id", applicant.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["applicants"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-summary"] });
+      toast.success("Interview scheduled");
+      onClose();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  return (
+    <Dialog open={!!applicant} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Schedule Interview — {applicant?.full_name}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Interview Date</Label>
+            <DatePickerField value={date} onChange={setDate} placeholder="Pick interview date" />
+          </div>
+          <div className="space-y-2">
+            <Label>Interview Time</Label>
+            <Input type="time" className="h-11" value={time} onChange={(e) => setTime(e.target.value)} required />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+            <Button type="submit" className="h-11" disabled={save.isPending}>
+              {save.isPending ? "Saving..." : "Save Interview"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -137,7 +231,7 @@ function ApplicantDialog({ open, onOpenChange, editing }: {
 }) {
   const qc = useQueryClient();
   const [form, setForm] = useState({
-    full_name: "", phone: "", email: "", notes: "", status: "Applied" as Status,
+    full_name: "", phone: "", email: "", notes: "",
   });
 
   useEffect(() => {
@@ -148,28 +242,27 @@ function ApplicantDialog({ open, onOpenChange, editing }: {
           phone: editing.phone ?? "",
           email: editing.email ?? "",
           notes: editing.notes ?? "",
-          status: editing.status,
         });
       } else {
-        setForm({ full_name: "", phone: "", email: "", notes: "", status: "Applied" });
+        setForm({ full_name: "", phone: "", email: "", notes: "" });
       }
     }
   }, [open, editing]);
 
   const save = useMutation({
     mutationFn: async () => {
+      if (!form.full_name.trim()) throw new Error("Full name is required");
       const payload = {
-        full_name: form.full_name,
+        full_name: form.full_name.trim(),
         phone: form.phone || null,
         email: form.email || null,
         notes: form.notes || null,
-        status: form.status,
       };
       if (editing) {
         const { error } = await supabase.from("applicants").update(payload).eq("id", editing.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("applicants").insert(payload);
+        const { error } = await supabase.from("applicants").insert({ ...payload, status: "Applied" });
         if (error) throw error;
       }
     },
@@ -204,21 +297,14 @@ function ApplicantDialog({ open, onOpenChange, editing }: {
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Status</Label>
-            <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as Status })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
             <Label>Notes</Label>
             <Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" disabled={save.isPending}>{editing ? "Save" : "Add"}</Button>
+            <Button type="submit" className="h-11" disabled={save.isPending}>
+              {save.isPending ? "Saving..." : editing ? "Save" : "Add"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

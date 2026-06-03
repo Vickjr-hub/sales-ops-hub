@@ -20,6 +20,8 @@ export type Database = {
           email: string | null
           full_name: string
           id: string
+          interview_date: string | null
+          interview_time: string | null
           notes: string | null
           phone: string | null
           status: Database["public"]["Enums"]["applicant_status"]
@@ -29,6 +31,8 @@ export type Database = {
           email?: string | null
           full_name: string
           id?: string
+          interview_date?: string | null
+          interview_time?: string | null
           notes?: string | null
           phone?: string | null
           status?: Database["public"]["Enums"]["applicant_status"]
@@ -38,6 +42,8 @@ export type Database = {
           email?: string | null
           full_name?: string
           id?: string
+          interview_date?: string | null
+          interview_time?: string | null
           notes?: string | null
           phone?: string | null
           status?: Database["public"]["Enums"]["applicant_status"]
@@ -52,6 +58,8 @@ export type Database = {
           gross_commission: number
           id: string
           internet_sales: number
+          pay_period_end: string | null
+          pay_period_start: string | null
           raw_lines: number
           rep_name: string
         }
@@ -62,6 +70,8 @@ export type Database = {
           gross_commission?: number
           id?: string
           internet_sales?: number
+          pay_period_end?: string | null
+          pay_period_start?: string | null
           raw_lines?: number
           rep_name: string
         }
@@ -72,6 +82,8 @@ export type Database = {
           gross_commission?: number
           id?: string
           internet_sales?: number
+          pay_period_end?: string | null
+          pay_period_start?: string | null
           raw_lines?: number
           rep_name?: string
         }
