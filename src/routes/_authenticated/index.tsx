@@ -82,7 +82,7 @@ function Dashboard() {
 
   return (
     <div className="max-w-6xl">
-      <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Sales Operations Dashboard</h1>
       <p className="text-muted-foreground mt-1">Overview of operations.</p>
       <div className="grid gap-4 mt-8 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => {
