@@ -7,7 +7,16 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Sign In — Operator" }] }),
+  head: () => ({
+    meta: [
+      { title: "Sign In — Operator" },
+      { name: "description", content: "Sign in or create an account to manage payroll, recruiting, and sales for your door-to-door team." },
+      { property: "og:title", content: "Sign In — Operator" },
+      { property: "og:description", content: "Sign in to Operator to manage payroll, recruiting, and sales submissions." },
+      { property: "og:url", content: "/auth" },
+    ],
+    links: [{ rel: "canonical", href: "/auth" }],
+  }),
   component: AuthPage,
 });
 
