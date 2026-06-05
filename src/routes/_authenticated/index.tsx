@@ -6,7 +6,16 @@ import { format, parseISO } from "date-fns";
 import { useRole } from "@/hooks/useRole";
 
 export const Route = createFileRoute("/_authenticated/")({
-  head: () => ({ meta: [{ title: "Dashboard — Operator" }] }),
+  head: () => ({
+    meta: [
+      { title: "Sales Operations Dashboard — Operator" },
+      { name: "description", content: "Overview of active reps, applicants, payroll totals, and upcoming interviews for your sales team." },
+      { property: "og:title", content: "Sales Operations Dashboard — Operator" },
+      { property: "og:description", content: "Track active reps, applicants, payroll, and upcoming interviews at a glance." },
+      { property: "og:url", content: "/" },
+    ],
+    links: [{ rel: "canonical", href: "/" }],
+  }),
   component: DashboardGate,
 });
 
