@@ -59,7 +59,7 @@ function AuthPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm border border-border rounded-lg p-8 bg-card">
-        <h1 className="text-2xl font-semibold tracking-tight">Operator</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Operator — Sales Operations Management</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {mode === "signin" ? "Sign in to continue" : "Create your account"}
         </p>
