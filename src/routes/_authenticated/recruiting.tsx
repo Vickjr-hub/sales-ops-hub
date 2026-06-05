@@ -14,9 +14,11 @@ import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
 import { DatePickerField } from "@/components/DatePickerField";
 
+import { OwnerOnly } from "@/components/OwnerOnly";
+
 export const Route = createFileRoute("/_authenticated/recruiting")({
   head: () => ({ meta: [{ title: "Recruiting — Operator" }] }),
-  component: RecruitingPage,
+  component: () => <OwnerOnly><RecruitingPage /></OwnerOnly>,
 });
 
 const STATUSES = ["Applied", "Interview Scheduled", "Interview Completed", "Hired", "Rejected"] as const;
