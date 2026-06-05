@@ -46,7 +46,7 @@ function AuthedLayout() {
       <aside className={`${mobileOpen ? "block" : "hidden"} md:block fixed md:static inset-0 md:inset-auto z-40 w-64 bg-card border-r border-border flex-shrink-0`}>
         <div className="flex flex-col h-full p-4">
           <div className="px-2 py-4">
-            <h1 className="text-xl font-bold tracking-tight">Operator</h1>
+            <div className="text-xl font-bold tracking-tight">Operator</div>
             <p className="text-xs text-muted-foreground mt-0.5">
               {isLoading ? "Loading…" : role === "owner" ? "Owner" : "Sales Rep"}
               {fullName ? ` • ${fullName}` : ""}
