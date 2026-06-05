@@ -1,0 +1,7 @@
+# Operator
+
+> Operator is a simple sales operations platform for door-to-door sales companies. It handles recruiting, sales submissions, and gross commission payroll.
+
+## Pages
+
+- [Sign In](/auth): Sign in or create an Operator account.

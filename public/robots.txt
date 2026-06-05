@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /payroll
+Disallow: /recruiting
+Disallow: /settings
+Disallow: /sales
+Disallow: /submit-sale
+Disallow: /my-sales
