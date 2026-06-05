@@ -17,7 +17,16 @@ import { DatePickerField } from "@/components/DatePickerField";
 import { OwnerOnly } from "@/components/OwnerOnly";
 
 export const Route = createFileRoute("/_authenticated/recruiting")({
-  head: () => ({ meta: [{ title: "Recruiting — Operator" }] }),
+  head: () => ({
+    meta: [
+      { title: "Recruiting — Operator" },
+      { name: "description", content: "Track applicants, schedule interviews, and manage hiring progress for your door-to-door sales team." },
+      { property: "og:title", content: "Recruiting — Operator" },
+      { property: "og:description", content: "Applicant tracking and interview scheduling for door-to-door sales hiring." },
+      { property: "og:url", content: "/recruiting" },
+    ],
+    links: [{ rel: "canonical", href: "/recruiting" }],
+  }),
   component: () => <OwnerOnly><RecruitingPage /></OwnerOnly>,
 });
 
