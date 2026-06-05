@@ -79,7 +79,7 @@ function AuthedLayout() {
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="md:hidden h-14 flex items-center justify-between border-b border-border px-4 bg-card">
-          <h1 className="font-bold">Operator</h1>
+          <span className="font-bold">Operator</span>
           <Button variant="outline" size="sm" onClick={() => setMobileOpen(!mobileOpen)}>Menu</Button>
         </header>
         <main className="flex-1 p-6 md:p-8 overflow-auto">
