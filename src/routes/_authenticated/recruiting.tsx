@@ -157,10 +157,10 @@ function RecruitingPage() {
                       <Button size="sm" variant="destructive" onClick={() => updateStatus.mutate({ id: a.id, status: "Rejected" })}>
                         <UserX className="h-4 w-4 mr-1" /> Reject
                       </Button>
-                      <Button size="icon" variant="ghost" onClick={() => { setEditing(a); setOpen(true); }}>
+                      <Button size="icon" variant="ghost" aria-label={`Edit applicant ${a.full_name}`} onClick={() => { setEditing(a); setOpen(true); }}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="ghost" onClick={() => { if (confirm("Delete this applicant?")) del.mutate(a.id); }}>
+                      <Button size="icon" variant="ghost" aria-label={`Delete applicant ${a.full_name}`} onClick={() => { if (confirm("Delete this applicant?")) del.mutate(a.id); }}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
