@@ -17,7 +17,16 @@ import { DatePickerField } from "@/components/DatePickerField";
 import { OwnerOnly } from "@/components/OwnerOnly";
 
 export const Route = createFileRoute("/_authenticated/payroll")({
-  head: () => ({ meta: [{ title: "Payroll — Operator" }] }),
+  head: () => ({
+    meta: [
+      { title: "Payroll — Operator" },
+      { name: "description", content: "Calculate weekly commission payroll for your door-to-door sales reps and generate payroll summaries." },
+      { property: "og:title", content: "Payroll — Operator" },
+      { property: "og:description", content: "Weekly commission payroll calculation and summaries for door-to-door sales teams." },
+      { property: "og:url", content: "/payroll" },
+    ],
+    links: [{ rel: "canonical", href: "/payroll" }],
+  }),
   component: () => <OwnerOnly><PayrollPage /></OwnerOnly>,
 });
 
@@ -172,10 +181,10 @@ function PayrollPage() {
                   <TableCell className="text-right font-semibold">${Number(e.gross_commission).toFixed(2)}</TableCell>
                   <TableCell>
                     <div className="flex gap-1 justify-end">
-                      <Button size="icon" variant="ghost" onClick={() => { setEditing(e); setOpen(true); }}>
+                      <Button size="icon" variant="ghost" aria-label={`Edit payroll entry for ${e.rep_name}`} onClick={() => { setEditing(e); setOpen(true); }}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="ghost" onClick={() => { if (confirm("Delete this entry?")) del.mutate(e.id); }}>
+                      <Button size="icon" variant="ghost" aria-label={`Delete payroll entry for ${e.rep_name}`} onClick={() => { if (confirm("Delete this entry?")) del.mutate(e.id); }}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>

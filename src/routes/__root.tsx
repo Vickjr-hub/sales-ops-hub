@@ -77,14 +77,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Operator — Sales Operations Management" },
+      { name: "description", content: "Operator helps door-to-door sales companies manage payroll, recruiting, and sales submissions in one simple workflow." },
+      { property: "og:title", content: "Operator — Sales Operations Management" },
+      { property: "og:description", content: "Manage payroll, recruiting, and sales submissions for your door-to-door sales team." },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Operator" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {

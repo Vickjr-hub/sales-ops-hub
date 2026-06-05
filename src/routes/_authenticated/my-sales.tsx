@@ -8,7 +8,16 @@ import { useRole } from "@/hooks/useRole";
 import { RepOnly } from "@/components/OwnerOnly";
 
 export const Route = createFileRoute("/_authenticated/my-sales")({
-  head: () => ({ meta: [{ title: "My Sales — Operator" }] }),
+  head: () => ({
+    meta: [
+      { title: "My Sales — Operator" },
+      { name: "description", content: "Review your submitted sales and their approval status." },
+      { property: "og:title", content: "My Sales — Operator" },
+      { property: "og:description", content: "Sales rep submission history and approval status." },
+      { property: "og:url", content: "/my-sales" },
+    ],
+    links: [{ rel: "canonical", href: "/my-sales" }],
+  }),
   component: () => <RepOnly><MySales /></RepOnly>,
 });
 

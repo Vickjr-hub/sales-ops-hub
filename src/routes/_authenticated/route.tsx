@@ -46,7 +46,7 @@ function AuthedLayout() {
       <aside className={`${mobileOpen ? "block" : "hidden"} md:block fixed md:static inset-0 md:inset-auto z-40 w-64 bg-card border-r border-border flex-shrink-0`}>
         <div className="flex flex-col h-full p-4">
           <div className="px-2 py-4">
-            <h1 className="text-xl font-bold tracking-tight">Operator</h1>
+            <div className="text-xl font-bold tracking-tight">Operator</div>
             <p className="text-xs text-muted-foreground mt-0.5">
               {isLoading ? "Loading…" : role === "owner" ? "Owner" : "Sales Rep"}
               {fullName ? ` • ${fullName}` : ""}
@@ -79,7 +79,7 @@ function AuthedLayout() {
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="md:hidden h-14 flex items-center justify-between border-b border-border px-4 bg-card">
-          <h1 className="font-bold">Operator</h1>
+          <span className="font-bold">Operator</span>
           <Button variant="outline" size="sm" onClick={() => setMobileOpen(!mobileOpen)}>Menu</Button>
         </header>
         <main className="flex-1 p-6 md:p-8 overflow-auto">

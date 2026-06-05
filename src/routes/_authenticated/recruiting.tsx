@@ -17,7 +17,16 @@ import { DatePickerField } from "@/components/DatePickerField";
 import { OwnerOnly } from "@/components/OwnerOnly";
 
 export const Route = createFileRoute("/_authenticated/recruiting")({
-  head: () => ({ meta: [{ title: "Recruiting — Operator" }] }),
+  head: () => ({
+    meta: [
+      { title: "Recruiting — Operator" },
+      { name: "description", content: "Track applicants, schedule interviews, and manage hiring progress for your door-to-door sales team." },
+      { property: "og:title", content: "Recruiting — Operator" },
+      { property: "og:description", content: "Applicant tracking and interview scheduling for door-to-door sales hiring." },
+      { property: "og:url", content: "/recruiting" },
+    ],
+    links: [{ rel: "canonical", href: "/recruiting" }],
+  }),
   component: () => <OwnerOnly><RecruitingPage /></OwnerOnly>,
 });
 
@@ -148,10 +157,10 @@ function RecruitingPage() {
                       <Button size="sm" variant="destructive" onClick={() => updateStatus.mutate({ id: a.id, status: "Rejected" })}>
                         <UserX className="h-4 w-4 mr-1" /> Reject
                       </Button>
-                      <Button size="icon" variant="ghost" onClick={() => { setEditing(a); setOpen(true); }}>
+                      <Button size="icon" variant="ghost" aria-label={`Edit applicant ${a.full_name}`} onClick={() => { setEditing(a); setOpen(true); }}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button size="icon" variant="ghost" onClick={() => { if (confirm("Delete this applicant?")) del.mutate(a.id); }}>
+                      <Button size="icon" variant="ghost" aria-label={`Delete applicant ${a.full_name}`} onClick={() => { if (confirm("Delete this applicant?")) del.mutate(a.id); }}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
