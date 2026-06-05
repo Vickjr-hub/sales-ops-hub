@@ -17,7 +17,16 @@ import { DatePickerField } from "@/components/DatePickerField";
 import { OwnerOnly } from "@/components/OwnerOnly";
 
 export const Route = createFileRoute("/_authenticated/payroll")({
-  head: () => ({ meta: [{ title: "Payroll — Operator" }] }),
+  head: () => ({
+    meta: [
+      { title: "Payroll — Operator" },
+      { name: "description", content: "Calculate weekly commission payroll for your door-to-door sales reps and generate payroll summaries." },
+      { property: "og:title", content: "Payroll — Operator" },
+      { property: "og:description", content: "Weekly commission payroll calculation and summaries for door-to-door sales teams." },
+      { property: "og:url", content: "/payroll" },
+    ],
+    links: [{ rel: "canonical", href: "/payroll" }],
+  }),
   component: () => <OwnerOnly><PayrollPage /></OwnerOnly>,
 });
 
