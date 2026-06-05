@@ -16,7 +16,16 @@ import { Check, X } from "lucide-react";
 import { OwnerOnly } from "@/components/OwnerOnly";
 
 export const Route = createFileRoute("/_authenticated/sales")({
-  head: () => ({ meta: [{ title: "Sales Review — Operator" }] }),
+  head: () => ({
+    meta: [
+      { title: "Sales Review — Operator" },
+      { name: "description", content: "Review, approve, or reject sales submitted by your door-to-door sales reps." },
+      { property: "og:title", content: "Sales Review — Operator" },
+      { property: "og:description", content: "Approve or reject rep-submitted sales to keep payroll accurate." },
+      { property: "og:url", content: "/sales" },
+    ],
+    links: [{ rel: "canonical", href: "/sales" }],
+  }),
   component: () => <OwnerOnly><SalesReview /></OwnerOnly>,
 });
 
