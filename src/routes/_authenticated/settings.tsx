@@ -7,9 +7,11 @@ import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { OwnerOnly } from "@/components/OwnerOnly";
+
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Operator" }] }),
-  component: SettingsPage,
+  component: () => <OwnerOnly><SettingsPage /></OwnerOnly>,
 });
 
 type Settings = { id: string; phone_line_rate: number; internet_rate: number; directv_rate: number };

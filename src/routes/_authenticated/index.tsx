@@ -1,13 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Users, UserPlus, DollarSign, CalendarClock } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { useRole } from "@/hooks/useRole";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({ meta: [{ title: "Dashboard — Operator" }] }),
-  component: Dashboard,
+  component: DashboardGate,
 });
+
+function DashboardGate() {
+  const { role, isLoading } = useRole();
+  if (isLoading) return <p className="text-muted-foreground">Loading…</p>;
+  if (role === "rep") return <Navigate to="/submit-sale" replace />;
+  return <Dashboard />;
+}
 
 type Applicant = {
   id: string;

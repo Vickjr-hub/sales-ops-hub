@@ -14,9 +14,11 @@ import { toast } from "sonner";
 import { format, startOfWeek, endOfWeek, parseISO } from "date-fns";
 import { DatePickerField } from "@/components/DatePickerField";
 
+import { OwnerOnly } from "@/components/OwnerOnly";
+
 export const Route = createFileRoute("/_authenticated/payroll")({
   head: () => ({ meta: [{ title: "Payroll — Operator" }] }),
-  component: PayrollPage,
+  component: () => <OwnerOnly><PayrollPage /></OwnerOnly>,
 });
 
 type Entry = {

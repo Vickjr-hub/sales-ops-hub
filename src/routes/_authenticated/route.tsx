@@ -1,8 +1,9 @@
 import { createFileRoute, Outlet, redirect, Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, DollarSign, Users, Settings as SettingsIcon, LogOut } from "lucide-react";
+import { LayoutDashboard, DollarSign, Users, Settings as SettingsIcon, LogOut, FilePlus, ListChecks, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useRole } from "@/hooks/useRole";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -14,31 +15,42 @@ export const Route = createFileRoute("/_authenticated")({
   component: AuthedLayout,
 });
 
-const nav = [
+const ownerNav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/sales", label: "Sales Review", icon: ClipboardCheck },
   { to: "/payroll", label: "Payroll", icon: DollarSign },
   { to: "/recruiting", label: "Recruiting", icon: Users },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
+] as const;
+
+const repNav = [
+  { to: "/submit-sale", label: "Submit Sale", icon: FilePlus },
+  { to: "/my-sales", label: "My Sales", icon: ListChecks },
 ] as const;
 
 function AuthedLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { role, fullName, isLoading } = useRole();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   };
 
+  const nav = role === "rep" ? repNav : ownerNav;
+
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Sidebar */}
       <aside className={`${mobileOpen ? "block" : "hidden"} md:block fixed md:static inset-0 md:inset-auto z-40 w-64 bg-card border-r border-border flex-shrink-0`}>
         <div className="flex flex-col h-full p-4">
           <div className="px-2 py-4">
             <h1 className="text-xl font-bold tracking-tight">Operator</h1>
-            <p className="text-xs text-muted-foreground mt-0.5">Sales Operations</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {isLoading ? "Loading…" : role === "owner" ? "Owner" : "Sales Rep"}
+              {fullName ? ` • ${fullName}` : ""}
+            </p>
           </div>
           <nav className="mt-4 flex-1 space-y-1">
             {nav.map((item) => {
@@ -65,7 +77,6 @@ function AuthedLayout() {
         </div>
       </aside>
 
-      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="md:hidden h-14 flex items-center justify-between border-b border-border px-4 bg-card">
           <h1 className="font-bold">Operator</h1>

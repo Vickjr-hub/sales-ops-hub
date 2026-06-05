@@ -14,6 +14,7 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,7 +37,10 @@ function AuthPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: { full_name: fullName },
+          },
         });
         if (error) throw error;
         toast.success("Account created. You can sign in now.");
@@ -57,9 +61,15 @@ function AuthPage() {
       <div className="w-full max-w-sm border border-border rounded-lg p-8 bg-card">
         <h1 className="text-2xl font-semibold tracking-tight">Operator</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {mode === "signin" ? "Sign in to continue" : "Create the admin account"}
+          {mode === "signin" ? "Sign in to continue" : "Create your account"}
         </p>
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          {mode === "signup" && (
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input id="fullName" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -77,8 +87,11 @@ function AuthPage() {
           onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
           className="mt-4 text-sm text-muted-foreground hover:text-foreground w-full text-center"
         >
-          {mode === "signin" ? "Need to create the admin account?" : "Already have an account? Sign in"}
+          {mode === "signin" ? "Need to create an account?" : "Already have an account? Sign in"}
         </button>
+        <p className="mt-4 text-xs text-muted-foreground text-center">
+          The first account becomes the Owner. All later accounts are Reps.
+        </p>
       </div>
     </div>
   );

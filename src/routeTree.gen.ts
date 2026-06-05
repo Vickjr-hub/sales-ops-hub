@@ -12,9 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedSubmitSaleRouteImport } from './routes/_authenticated/submit-sale'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/sales'
 import { Route as AuthenticatedRecruitingRouteImport } from './routes/_authenticated/recruiting'
 import { Route as AuthenticatedPayrollRouteImport } from './routes/_authenticated/payroll'
+import { Route as AuthenticatedMySalesRouteImport } from './routes/_authenticated/my-sales'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -30,9 +33,19 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSubmitSaleRoute = AuthenticatedSubmitSaleRouteImport.update({
+  id: '/submit-sale',
+  path: '/submit-sale',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSalesRoute = AuthenticatedSalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRecruitingRoute = AuthenticatedRecruitingRouteImport.update({
@@ -45,42 +58,75 @@ const AuthenticatedPayrollRoute = AuthenticatedPayrollRouteImport.update({
   path: '/payroll',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMySalesRoute = AuthenticatedMySalesRouteImport.update({
+  id: '/my-sales',
+  path: '/my-sales',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
+  '/my-sales': typeof AuthenticatedMySalesRoute
   '/payroll': typeof AuthenticatedPayrollRoute
   '/recruiting': typeof AuthenticatedRecruitingRoute
+  '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/submit-sale': typeof AuthenticatedSubmitSaleRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/my-sales': typeof AuthenticatedMySalesRoute
   '/payroll': typeof AuthenticatedPayrollRoute
   '/recruiting': typeof AuthenticatedRecruitingRoute
+  '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/submit-sale': typeof AuthenticatedSubmitSaleRoute
   '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/my-sales': typeof AuthenticatedMySalesRoute
   '/_authenticated/payroll': typeof AuthenticatedPayrollRoute
   '/_authenticated/recruiting': typeof AuthenticatedRecruitingRoute
+  '/_authenticated/sales': typeof AuthenticatedSalesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/submit-sale': typeof AuthenticatedSubmitSaleRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/payroll' | '/recruiting' | '/settings'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/my-sales'
+    | '/payroll'
+    | '/recruiting'
+    | '/sales'
+    | '/settings'
+    | '/submit-sale'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/payroll' | '/recruiting' | '/settings' | '/'
+  to:
+    | '/auth'
+    | '/my-sales'
+    | '/payroll'
+    | '/recruiting'
+    | '/sales'
+    | '/settings'
+    | '/submit-sale'
+    | '/'
   id:
     | '__root__'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/my-sales'
     | '/_authenticated/payroll'
     | '/_authenticated/recruiting'
+    | '/_authenticated/sales'
     | '/_authenticated/settings'
+    | '/_authenticated/submit-sale'
     | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
@@ -112,11 +158,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/submit-sale': {
+      id: '/_authenticated/submit-sale'
+      path: '/submit-sale'
+      fullPath: '/submit-sale'
+      preLoaderRoute: typeof AuthenticatedSubmitSaleRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/sales': {
+      id: '/_authenticated/sales'
+      path: '/sales'
+      fullPath: '/sales'
+      preLoaderRoute: typeof AuthenticatedSalesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/recruiting': {
@@ -133,20 +193,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPayrollRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/my-sales': {
+      id: '/_authenticated/my-sales'
+      path: '/my-sales'
+      fullPath: '/my-sales'
+      preLoaderRoute: typeof AuthenticatedMySalesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedMySalesRoute: typeof AuthenticatedMySalesRoute
   AuthenticatedPayrollRoute: typeof AuthenticatedPayrollRoute
   AuthenticatedRecruitingRoute: typeof AuthenticatedRecruitingRoute
+  AuthenticatedSalesRoute: typeof AuthenticatedSalesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedSubmitSaleRoute: typeof AuthenticatedSubmitSaleRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedMySalesRoute: AuthenticatedMySalesRoute,
   AuthenticatedPayrollRoute: AuthenticatedPayrollRoute,
   AuthenticatedRecruitingRoute: AuthenticatedRecruitingRoute,
+  AuthenticatedSalesRoute: AuthenticatedSalesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedSubmitSaleRoute: AuthenticatedSubmitSaleRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
