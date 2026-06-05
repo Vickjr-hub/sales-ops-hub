@@ -10,7 +10,16 @@ import { toast } from "sonner";
 import { OwnerOnly } from "@/components/OwnerOnly";
 
 export const Route = createFileRoute("/_authenticated/settings")({
-  head: () => ({ meta: [{ title: "Settings — Operator" }] }),
+  head: () => ({
+    meta: [
+      { title: "Settings — Operator" },
+      { name: "description", content: "Update commission rates for phone lines, internet, and DirectTV. Existing payroll recalculates automatically." },
+      { property: "og:title", content: "Settings — Operator" },
+      { property: "og:description", content: "Manage commission rates used to calculate sales rep payroll." },
+      { property: "og:url", content: "/settings" },
+    ],
+    links: [{ rel: "canonical", href: "/settings" }],
+  }),
   component: () => <OwnerOnly><SettingsPage /></OwnerOnly>,
 });
 
