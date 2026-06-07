@@ -50,29 +50,6 @@ function SubmitSale() {
 
   const submit = useMutation({
     mutationFn: async () => {
-      const validateSale = (input: any) => {
-  const issues: string[] = [];
-
-  if (!input.customer_name) issues.push("Missing customer name");
-  if (!input.spm_number || input.spm_number.length !== 9)
-    issues.push("SPM number must be exactly 9 characters");
-  if (!input.lines || input.lines <= 0)
-    issues.push("Lines must be greater than 0");
-  if (!input.sale_type) issues.push("Missing sale type");
-  if (!input.package_type) issues.push("Missing package type");
-
-  return issues;
-};
-      const validationIssues = validateSale({
-        customer_name: customerName,
-        spm_number: spmNumber,
-        lines,
-        sale_type: saleType,
-        package_type: packageType
-      });
-      if (validationIssues.length > 0) {
-        throw new Error(validationIssues.join(", "));
-      }
       if (!userId) throw new Error("Not signed in");
       let photo_url: string | null = null;
       if (photo) {
