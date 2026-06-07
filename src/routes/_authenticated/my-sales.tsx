@@ -55,12 +55,13 @@ function MySales() {
               <TableHead>Sale Type</TableHead>
               <TableHead>Package</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Activation</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {(!data || data.length === 0) ? (
-              <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-10">No sales submitted yet.</TableCell></TableRow>
-            ) : data.map((s) => (
+              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-10">No sales submitted yet.</TableCell></TableRow>
+            ) : data.map((s: any) => (
               <TableRow key={s.id}>
                 <TableCell>{format(parseISO(s.created_at), "MMM d, yyyy")}</TableCell>
                 <TableCell className="font-medium">{s.customer_name}</TableCell>
@@ -69,6 +70,11 @@ function MySales() {
                 <TableCell>{s.sale_type}</TableCell>
                 <TableCell>{s.package_type}</TableCell>
                 <TableCell><StatusBadge status={s.status} /></TableCell>
+                <TableCell>
+                  <Badge variant={s.activation_status === "Activated" ? "default" : "outline"}>
+                    {s.activation_status ?? "Pending Activation"}
+                  </Badge>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
