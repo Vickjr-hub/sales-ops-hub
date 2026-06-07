@@ -12,6 +12,8 @@ import {
 import { toast } from "sonner";
 import { useRole } from "@/hooks/useRole";
 import { RepOnly } from "@/components/OwnerOnly";
+import { Check, Copy } from "lucide-react";
+import { format, parseISO } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/submit-sale")({
   head: () => ({
@@ -29,6 +31,15 @@ export const Route = createFileRoute("/_authenticated/submit-sale")({
 
 const today = () => new Date().toISOString().slice(0, 10);
 
+type Submitted = {
+  customer_name: string;
+  spm_number: string;
+  lines: number;
+  sale_type: string;
+  package_type: string;
+  sale_date: string;
+};
+
 function SubmitSale() {
   const { userId } = useRole();
   const qc = useQueryClient();
@@ -41,24 +52,27 @@ function SubmitSale() {
   const [notes, setNotes] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [saleDate, setSaleDate] = useState<string>(today());
+  const [submitted, setSubmitted] = useState<Submitted | null>(null);
 
   const reset = () => {
     setCustomerName(""); setSpmNumber(""); setLines(1);
     setSaleType("New Customer"); setPackageType("Standard");
     setNotes(""); setPhoto(null); setSaleDate(today());
+    setSubmitted(null);
   };
 
   const submit = useMutation({
     mutationFn: async () => {
       if (!userId) throw new Error("Not signed in");
-      let photo_url: string | null = null;
-      if (photo) {
-        const ext = photo.name.split(".").pop() ?? "jpg";
-        const path = `${userId}/${crypto.randomUUID()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("sale-photos").upload(path, photo);
-        if (upErr) throw upErr;
-        photo_url = path;
-      }
+      if (spmNumber.trim().length !== 9) throw new Error("SPM Number must be exactly 9 characters");
+      if (lines < 1) throw new Error("Lines must be at least 1");
+      if (!photo) throw new Error("Photo is required");
+
+      const ext = photo.name.split(".").pop() ?? "jpg";
+      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("sale-photos").upload(path, photo);
+      if (upErr) throw upErr;
+
       const { error } = await supabase.from("sales").insert({
         rep_id: userId,
         customer_name: customerName,
@@ -67,18 +81,77 @@ function SubmitSale() {
         sale_type: saleType,
         package_type: packageType,
         notes: notes || null,
-        photo_url,
+        photo_url: path,
         sale_date: saleDate,
       });
       if (error) throw error;
+
+      return {
+        customer_name: customerName,
+        spm_number: spmNumber,
+        lines,
+        sale_type: saleType,
+        package_type: packageType,
+        sale_date: saleDate,
+      } satisfies Submitted;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Sale submitted");
       qc.invalidateQueries({ queryKey: ["my-sales"] });
-      reset();
+      setSubmitted(data);
     },
     onError: (e: any) => toast.error(e.message ?? "Failed to submit"),
   });
+
+  if (submitted) {
+    const summary = [
+      `Customer: ${submitted.customer_name}`,
+      `SPM: ${submitted.spm_number}`,
+      `Lines: ${submitted.lines}`,
+      `Sale Type: ${submitted.sale_type}`,
+      `Package: ${submitted.package_type}`,
+      `Date: ${format(parseISO(submitted.sale_date), "MMM d, yyyy")}`,
+    ].join("\n");
+
+    const copy = async () => {
+      try {
+        await navigator.clipboard.writeText(summary);
+        toast.success("Summary copied to clipboard");
+      } catch {
+        toast.error("Copy failed");
+      }
+    };
+
+    return (
+      <div className="max-w-2xl">
+        <h1 className="text-3xl font-bold tracking-tight">Sale Submitted</h1>
+        <p className="text-muted-foreground mt-1">Your submission was recorded and is pending owner review.</p>
+
+        <div className="mt-8 border border-border rounded-lg p-6 bg-card">
+          <div className="flex items-center gap-2 text-primary font-semibold">
+            <Check className="h-5 w-5" /> Submission Confirmed
+          </div>
+          <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+            <dt className="text-muted-foreground">Customer</dt><dd className="font-medium">{submitted.customer_name}</dd>
+            <dt className="text-muted-foreground">SPM Number</dt><dd className="font-medium">{submitted.spm_number}</dd>
+            <dt className="text-muted-foreground">Lines</dt><dd className="font-medium">{submitted.lines}</dd>
+            <dt className="text-muted-foreground">Submission Date</dt><dd className="font-medium">{format(parseISO(submitted.sale_date), "MMM d, yyyy")}</dd>
+          </dl>
+
+          <pre className="mt-5 text-xs bg-muted p-3 rounded-md whitespace-pre-wrap font-mono">{summary}</pre>
+
+          <div className="mt-5 flex flex-col sm:flex-row gap-3">
+            <Button onClick={copy} className="h-12 text-base flex-1">
+              <Copy className="h-4 w-4" /> Copy Summary
+            </Button>
+            <Button variant="outline" onClick={reset} className="h-12 text-base flex-1">
+              Submit Another Sale
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl">
@@ -96,7 +169,17 @@ function SubmitSale() {
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="spm">SPM Number</Label>
-            <Input id="spm" required value={spmNumber} onChange={(e) => setSpmNumber(e.target.value)} />
+            <Input
+              id="spm"
+              required
+              value={spmNumber}
+              onChange={(e) => setSpmNumber(e.target.value)}
+              maxLength={9}
+              minLength={9}
+              pattern=".{9}"
+              title="SPM Number must be exactly 9 characters"
+            />
+            <p className="text-xs text-muted-foreground">Must be exactly 9 characters.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="lines">Number of Lines</Label>
@@ -137,9 +220,9 @@ function SubmitSale() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="photo">Photo Upload</Label>
-          <Input id="photo" type="file" accept="image/*"
+          <Input id="photo" type="file" accept="image/*" required
             onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
-          <p className="text-xs text-muted-foreground">Order screenshot or proof of sale.</p>
+          <p className="text-xs text-muted-foreground">Order screenshot or proof of sale (required).</p>
         </div>
         <Button type="submit" className="w-full h-12 text-base" disabled={submit.isPending}>
           {submit.isPending ? "Submitting…" : "Submit Sale"}

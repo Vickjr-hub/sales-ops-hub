@@ -1,0 +1,2 @@
+ALTER TABLE public.sales ADD COLUMN IF NOT EXISTS activation_status text NOT NULL DEFAULT 'Pending Activation';
+ALTER TABLE public.sales ADD CONSTRAINT sales_activation_status_check CHECK (activation_status IN ('Pending Activation','Activated'));
