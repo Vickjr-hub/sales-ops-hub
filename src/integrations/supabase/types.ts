@@ -109,6 +109,7 @@ export type Database = {
       }
       sales: {
         Row: {
+          activation_status: string
           created_at: string
           customer_name: string
           id: string
@@ -123,6 +124,7 @@ export type Database = {
           status: string
         }
         Insert: {
+          activation_status?: string
           created_at?: string
           customer_name: string
           id?: string
@@ -137,6 +139,7 @@ export type Database = {
           status?: string
         }
         Update: {
+          activation_status?: string
           created_at?: string
           customer_name?: string
           id?: string
