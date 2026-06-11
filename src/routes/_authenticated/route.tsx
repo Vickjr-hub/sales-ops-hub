@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect, Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/backend-client";
 import { LayoutDashboard, DollarSign, Users, Settings as SettingsIcon, LogOut, FilePlus, ListChecks, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
