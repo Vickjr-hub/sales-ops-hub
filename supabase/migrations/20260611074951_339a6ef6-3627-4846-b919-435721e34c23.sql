@@ -1,0 +1,3 @@
+CREATE POLICY "Owners insert roles" ON public.user_roles FOR INSERT TO authenticated WITH CHECK (public.has_role(auth.uid(), 'owner'));
+CREATE POLICY "Owners update roles" ON public.user_roles FOR UPDATE TO authenticated USING (public.has_role(auth.uid(), 'owner')) WITH CHECK (public.has_role(auth.uid(), 'owner'));
+CREATE POLICY "Owners delete roles" ON public.user_roles FOR DELETE TO authenticated USING (public.has_role(auth.uid(), 'owner'));
