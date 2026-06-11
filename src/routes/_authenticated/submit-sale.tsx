@@ -99,7 +99,7 @@ function SubmitSale() {
 
       return {
         customer_name: trimmedName,
-        spm_number: spmNumber,
+        spm_number: trimmedSpm,
         lines,
         sale_type: saleType,
         package_type: packageType,
