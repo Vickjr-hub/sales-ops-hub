@@ -194,8 +194,14 @@ function SubmitSale() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="lines">Number of Lines</Label>
-            <Input id="lines" type="number" min={1} required value={lines}
-              onChange={(e) => setLines(Math.max(1, Number(e.target.value)))} />
+            <Select value={String(lines)} onValueChange={(v) => setLines(Number(v))}>
+              <SelectTrigger id="lines"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                  <SelectItem key={n} value={String(n)}>{n}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
