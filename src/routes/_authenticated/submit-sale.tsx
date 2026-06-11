@@ -64,30 +64,41 @@ function SubmitSale() {
   const submit = useMutation({
     mutationFn: async () => {
       if (!userId) throw new Error("Not signed in");
-      if (spmNumber.trim().length !== 9) throw new Error("SPM Number must be exactly 9 characters");
+      const trimmedName = customerName.trim();
+      const trimmedSpm = spmNumber.trim();
+      if (trimmedName.length < 2) throw new Error("Customer Name is required");
+      if (trimmedSpm.length !== 9) throw new Error("SPM Number must be exactly 9 characters");
       if (lines < 1) throw new Error("Lines must be at least 1");
       if (!photo) throw new Error("Photo is required");
+      if (photo.size > 10 * 1024 * 1024) throw new Error("Photo must be under 10MB");
 
-      const ext = photo.name.split(".").pop() ?? "jpg";
+      const ext = (photo.name.split(".").pop() || "jpg").toLowerCase();
       const path = `${userId}/${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from("sale-photos").upload(path, photo);
-      if (upErr) throw upErr;
+      const { error: upErr } = await supabase.storage.from("sale-photos").upload(path, photo, {
+        contentType: photo.type || undefined,
+        upsert: false,
+      });
+      if (upErr) throw new Error(`Photo upload failed: ${upErr.message}`);
 
       const { error } = await supabase.from("sales").insert({
         rep_id: userId,
-        customer_name: customerName,
-        spm_number: spmNumber,
+        customer_name: trimmedName,
+        spm_number: trimmedSpm,
         lines,
         sale_type: saleType,
         package_type: packageType,
-        notes: notes || null,
+        notes: notes.trim() || null,
         photo_url: path,
         sale_date: saleDate,
       });
-      if (error) throw error;
+      if (error) {
+        // Clean up orphaned photo so storage doesn't accumulate junk
+        await supabase.storage.from("sale-photos").remove([path]).catch(() => {});
+        throw new Error(`Could not save sale: ${error.message}`);
+      }
 
       return {
-        customer_name: customerName,
+        customer_name: trimmedName,
         spm_number: spmNumber,
         lines,
         sale_type: saleType,
