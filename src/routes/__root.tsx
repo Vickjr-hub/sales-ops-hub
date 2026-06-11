@@ -77,13 +77,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Operator — Sales Operations Management" },
-      { name: "description", content: "Operator helps door-to-door sales companies manage payroll, recruiting, and sales submissions in one simple workflow." },
-      { property: "og:title", content: "Operator — Sales Operations Management" },
-      { property: "og:description", content: "Manage payroll, recruiting, and sales submissions for your door-to-door sales team." },
+      { title: "Operator — Field Operations Platform" },
+      { name: "description", content: "Operator streamlines recruiting, payroll, and sales operations for door-to-door teams in one place" },
+      { property: "og:title", content: "Operator — Field Operations Platform" },
+      { property: "og:description", content: "Operator streamlines recruiting, payroll, and sales operations for door-to-door teams in one place" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Operator" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Operator — Field Operations Platform" },
+      { name: "twitter:description", content: "Operator streamlines recruiting, payroll, and sales operations for door-to-door teams in one place" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/qx5B1d0RfiRgpIRIu2JztxzVTnw1/social-images/social-1781337086030-f36baafd-3299-4a74-8abe-f1bf661e387a.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/qx5B1d0RfiRgpIRIu2JztxzVTnw1/social-images/social-1781337086030-f36baafd-3299-4a74-8abe-f1bf661e387a.webp" },
     ],
     links: [
       {
