@@ -58,6 +58,7 @@ export const inviteRepresentative = createServerFn({ method: "POST" })
     });
 
     if (roleError || recordError) {
+      await supabaseAdmin.from("user_roles").delete().eq("user_id", userId).eq("role", "rep");
       await supabaseAdmin.auth.admin.deleteUser(userId);
       throw new Error(roleError?.message ?? recordError?.message ?? "Unable to create the invitation");
     }

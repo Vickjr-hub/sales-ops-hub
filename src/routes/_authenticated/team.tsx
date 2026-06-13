@@ -55,8 +55,11 @@ function TeamPage() {
     onError: (inviteError) => toast.error(inviteError.message),
   });
 
-  const representatives = data?.members.filter((member) => member.role === "rep") ?? [];
   const pending = data?.invitations.filter((invitation) => invitation.status === "pending") ?? [];
+  const pendingUserIds = new Set(pending.map((invitation) => invitation.user_id));
+  const representatives = data?.members.filter(
+    (member) => member.role === "rep" && !pendingUserIds.has(member.userId),
+  ) ?? [];
 
   return (
     <div className="max-w-6xl">
