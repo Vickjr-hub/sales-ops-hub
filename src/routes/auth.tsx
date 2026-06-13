@@ -23,7 +23,6 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -73,14 +72,6 @@ function AuthPage() {
     : "Create your account"}
 </p>
 
-        {mode === "signup" ? (
-          <div className="mt-6 space-y-4">
-            <div className="rounded-md border border-border bg-muted p-4 text-sm text-muted-foreground">
-              Accounts are created from a secure team invitation. Open the invitation email from your owner to create your password.
-            </div>
-            <Button type="button" variant="outline" className="h-11 w-full" onClick={() => setMode("signin")}>Back to Sign In</Button>
-          </div>
-        ) : (
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -109,16 +100,15 @@ function AuthPage() {
             {loading ? "Signing In…" : "Sign In"}
           </Button>
         </form>
-        )}
 
-        {mode === "signin" ? <Button
+        <Button
           type="button"
           variant="ghost"
-          onClick={() => setMode("signup")}
+          onClick={() => toast.info("Open the invitation email from your owner to create your account.")}
           className="mt-4 w-full text-muted-foreground"
         >
           Create Account
-        </Button> : null}
+        </Button>
       </div>
     </div>
   );
