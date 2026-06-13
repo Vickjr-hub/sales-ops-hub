@@ -1,9 +1,10 @@
 import { createFileRoute, Outlet, redirect, Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/lib/backend-client";
-import { LayoutDashboard, DollarSign, Users, Settings as SettingsIcon, LogOut, FilePlus, ListChecks, ClipboardCheck } from "lucide-react";
+import { LayoutDashboard, DollarSign, Users, Settings as SettingsIcon, LogOut, FilePlus, ListChecks, ClipboardCheck, UserRoundCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRole } from "@/hooks/useRole";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -20,6 +21,7 @@ const ownerNav = [
   { to: "/sales", label: "Sales Review", icon: ClipboardCheck },
   { to: "/payroll", label: "Payroll", icon: DollarSign },
   { to: "/recruiting", label: "Recruiting", icon: Users },
+  { to: "/team", label: "Team Management", icon: UserRoundCog },
   { to: "/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
 
@@ -31,15 +33,18 @@ const repNav = [
 function AuthedLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { role, fullName, isLoading } = useRole();
 
   const handleLogout = async () => {
+    await queryClient.cancelQueries();
+    queryClient.clear();
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   };
 
-  const nav = role === "rep" ? repNav : ownerNav;
+  const nav = role === "rep" ? repNav : role === "owner" ? ownerNav : [];
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -48,7 +53,7 @@ function AuthedLayout() {
           <div className="px-2 py-4">
             <div className="text-xl font-bold tracking-tight">Operator</div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {isLoading ? "Loading…" : role === "owner" ? "Owner" : "Sales Rep"}
+              {isLoading ? "Loading…" : role === "owner" ? "Owner" : role === "rep" ? "Sales Rep" : "Access unavailable"}
               {fullName ? ` • ${fullName}` : ""}
             </p>
           </div>

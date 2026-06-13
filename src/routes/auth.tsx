@@ -23,8 +23,6 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,28 +46,12 @@ function AuthPage() {
     setLoading(true);
 
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { full_name: fullName },
-          },
-        });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        if (error) throw error;
-
-        toast.success("Account created. You can sign in now.");
-        setMode("signin");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) throw error;
-      }
+      if (error) throw error;
     } catch (err: any) {
       toast.error(err.message ?? "Authentication failed");
     } finally {
@@ -85,18 +67,10 @@ function AuthPage() {
 </h1>
 
 <p className="mt-1 text-sm text-muted-foreground">
-  {mode === "signin"
-    ? "Sign in to continue"
-    : "Create your account"}
+  Sign in to continue
 </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          {mode === "signup" && (
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input id="fullName" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
-            </div>
-          )}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -121,28 +95,18 @@ function AuthPage() {
           </div>
 
           <Button type="submit" className="w-full h-11" disabled={loading}>
-            {loading
-              ? "..."
-              : mode === "signin"
-              ? "Sign In"
-              : "Create Account"}
+            {loading ? "Signing In…" : "Sign In"}
           </Button>
         </form>
 
-        <button
+        <Button
           type="button"
-          onClick={() =>
-            setMode(mode === "signin" ? "signup" : "signin")
-          }
-          className="mt-4 text-sm text-muted-foreground hover:text-foreground w-full text-center"
+          variant="ghost"
+          onClick={() => toast.info("Open the invitation email from your owner to create your account.")}
+          className="mt-4 w-full text-muted-foreground"
         >
-{mode === "signin"
-  ? "Need to create an account?"
-  : "Already have an account? Sign in"}
-        </button>
-        <p className="mt-4 text-xs text-muted-foreground text-center">
-          The first account becomes the Owner. All later accounts are Reps.
-        </p>
+          Create Account
+        </Button>
       </div>
     </div>
   );

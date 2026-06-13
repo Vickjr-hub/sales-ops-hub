@@ -16,7 +16,7 @@ export function useRole() {
         supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
       ]);
       return {
-        role: (roleRow?.role ?? "rep") as AppRole,
+        role: (roleRow?.role ?? null) as AppRole | null,
         userId: user.id,
         fullName: profile?.full_name ?? "",
       };

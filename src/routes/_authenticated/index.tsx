@@ -23,6 +23,7 @@ function DashboardGate() {
   const { role, isLoading } = useRole();
   if (isLoading) return <p className="text-muted-foreground">Loading…</p>;
   if (role === "rep") return <Navigate to="/submit-sale" replace />;
+  if (role !== "owner") return <p className="text-destructive">This account does not have access to Operator. Contact your owner.</p>;
   return <Dashboard />;
 }
 
