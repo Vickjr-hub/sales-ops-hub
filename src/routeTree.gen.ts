@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AcceptInviteRouteImport } from './routes/accept-invite'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
 import { Route as AuthenticatedSubmitSaleRouteImport } from './routes/_authenticated/submit-sale'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSalesRouteImport } from './routes/_authenticated/sales'
@@ -30,6 +32,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AcceptInviteRoute = AcceptInviteRouteImport.update({
+  id: '/accept-invite',
+  path: '/accept-invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
@@ -37,6 +44,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSubmitSaleRoute = AuthenticatedSubmitSaleRouteImport.update({
@@ -72,6 +84,7 @@ const AuthenticatedMySalesRoute = AuthenticatedMySalesRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
+  '/accept-invite': typeof AcceptInviteRoute
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/my-sales': typeof AuthenticatedMySalesRoute
@@ -80,8 +93,10 @@ export interface FileRoutesByFullPath {
   '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/submit-sale': typeof AuthenticatedSubmitSaleRoute
+  '/team': typeof AuthenticatedTeamRoute
 }
 export interface FileRoutesByTo {
+  '/accept-invite': typeof AcceptInviteRoute
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/my-sales': typeof AuthenticatedMySalesRoute
@@ -90,11 +105,13 @@ export interface FileRoutesByTo {
   '/sales': typeof AuthenticatedSalesRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/submit-sale': typeof AuthenticatedSubmitSaleRoute
+  '/team': typeof AuthenticatedTeamRoute
   '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/accept-invite': typeof AcceptInviteRoute
   '/auth': typeof AuthRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/my-sales': typeof AuthenticatedMySalesRoute
@@ -103,12 +120,14 @@ export interface FileRoutesById {
   '/_authenticated/sales': typeof AuthenticatedSalesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/submit-sale': typeof AuthenticatedSubmitSaleRoute
+  '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/accept-invite'
     | '/auth'
     | '/sitemap.xml'
     | '/my-sales'
@@ -117,8 +136,10 @@ export interface FileRouteTypes {
     | '/sales'
     | '/settings'
     | '/submit-sale'
+    | '/team'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/accept-invite'
     | '/auth'
     | '/sitemap.xml'
     | '/my-sales'
@@ -127,10 +148,12 @@ export interface FileRouteTypes {
     | '/sales'
     | '/settings'
     | '/submit-sale'
+    | '/team'
     | '/'
   id:
     | '__root__'
     | '/_authenticated'
+    | '/accept-invite'
     | '/auth'
     | '/sitemap.xml'
     | '/_authenticated/my-sales'
@@ -139,11 +162,13 @@ export interface FileRouteTypes {
     | '/_authenticated/sales'
     | '/_authenticated/settings'
     | '/_authenticated/submit-sale'
+    | '/_authenticated/team'
     | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AcceptInviteRoute: typeof AcceptInviteRoute
   AuthRoute: typeof AuthRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
@@ -164,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/accept-invite': {
+      id: '/accept-invite'
+      path: '/accept-invite'
+      fullPath: '/accept-invite'
+      preLoaderRoute: typeof AcceptInviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -176,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/team': {
+      id: '/_authenticated/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof AuthenticatedTeamRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/submit-sale': {
@@ -230,6 +269,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSalesRoute: typeof AuthenticatedSalesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSubmitSaleRoute: typeof AuthenticatedSubmitSaleRoute
+  AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
@@ -240,6 +280,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSalesRoute: AuthenticatedSalesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSubmitSaleRoute: AuthenticatedSubmitSaleRoute,
+  AuthenticatedTeamRoute: AuthenticatedTeamRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
@@ -248,6 +289,7 @@ const AuthenticatedRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AcceptInviteRoute: AcceptInviteRoute,
   AuthRoute: AuthRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
