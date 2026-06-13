@@ -46,9 +46,6 @@ export const inviteRepresentative = createServerFn({ method: "POST" })
     }
 
     const userId = invited.user.id;
-    const { error: roleError } = await supabaseAdmin
-      .from("user_roles")
-      .insert({ user_id: userId, role: "rep" });
     const { error: recordError } = await supabaseAdmin.from("team_invitations").insert({
       email: data.email,
       invited_by: context.userId,
@@ -57,10 +54,9 @@ export const inviteRepresentative = createServerFn({ method: "POST" })
       status: "pending",
     });
 
-    if (roleError || recordError) {
-      await supabaseAdmin.from("user_roles").delete().eq("user_id", userId).eq("role", "rep");
+    if (recordError) {
       await supabaseAdmin.auth.admin.deleteUser(userId);
-      throw new Error(roleError?.message ?? recordError?.message ?? "Unable to create the invitation");
+      throw new Error(recordError.message);
     }
 
     return { email: data.email };
@@ -126,13 +122,10 @@ export const acceptRepresentativeInvitation = createServerFn({ method: "POST" })
       throw new Error("This invitation has expired. Ask the owner for a new invitation.");
     }
 
-    const { data: role } = await supabaseAdmin
+    const { error: roleError } = await supabaseAdmin
       .from("user_roles")
-      .select("role")
-      .eq("user_id", context.userId)
-      .eq("role", "rep")
-      .maybeSingle();
-    if (!role) throw new Error("Representative access was not provisioned for this invitation");
+      .upsert({ user_id: context.userId, role: "rep" }, { onConflict: "user_id,role" });
+    if (roleError) throw new Error(roleError.message);
 
     const { error: updateError } = await supabaseAdmin
       .from("team_invitations")
