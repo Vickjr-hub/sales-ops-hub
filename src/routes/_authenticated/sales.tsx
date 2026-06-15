@@ -46,7 +46,7 @@ type Sale = {
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const v = status === "Approved" ? "default" : status === "Rejected" ? "destructive" : "secondary";
+  const v = status === "Approved" || status === "Activated" ? "default" : status === "Rejected" ? "destructive" : "secondary";
   return <Badge variant={v as any}>{status}</Badge>;
 }
 
@@ -248,7 +248,7 @@ function SalesReview() {
       sale={s}
       repName={profileMap.get(s.rep_id) ?? "—"}
       busy={updateSale.isPending}
-      onApprove={() => updateSale.mutate({ id: s.id, changes: { status: "Approved" } }, { onSuccess: () => toast.success("Sale approved") })}
+      onApprove={() => updateSale.mutate({ id: s.id, changes: { status: "Approved" } }, { onSuccess: () => toast.success("Sale approved and payroll updated") })}
       onReject={() => updateSale.mutate({ id: s.id, changes: { status: "Rejected" } }, { onSuccess: () => toast.success("Sale rejected") })}
       onActivate={() => updateSale.mutate({ id: s.id, changes: { status: "Activated", activation_status: "Activated" } }, { onSuccess: () => toast.success("Sale activated and payroll updated") })}
       onViewPhoto={() => s.photo_url && viewPhoto(s.photo_url)}
