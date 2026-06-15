@@ -40,7 +40,7 @@ type Sale = {
   notes: string | null;
   photo_url: string | null;
   sale_date: string;
-  status: "Pending" | "Approved" | "Rejected";
+  status: "Pending" | "Approved" | "Activated" | "Rejected";
   activation_status: "Pending Activation" | "Activated";
   created_at: string;
 };

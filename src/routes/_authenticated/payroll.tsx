@@ -55,11 +55,6 @@ function fmtDate(d: string | null) {
 }
 
 function PayrollPage() {
-  const qc = useQueryClient();
-  const [editing, setEditing] = useState<Entry | null>(null);
-  const [open, setOpen] = useState(false);
-  const [summaryOpen, setSummaryOpen] = useState(false);
-
   const wk = defaultWeek();
   const [filterStart, setFilterStart] = useState<string | null>(wk.start);
   const [filterEnd, setFilterEnd] = useState<string | null>(wk.end);
@@ -76,27 +71,6 @@ function PayrollPage() {
     },
   });
 
-  const { data: rates } = useQuery({
-    queryKey: ["settings"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("settings").select("*").limit(1).maybeSingle();
-      if (error) throw error;
-      return (data ?? { phone_line_rate: 200, internet_rate: 0, directv_rate: 50 }) as Rates;
-    },
-  });
-
-  const del = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("payroll_entries").delete().eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["payroll"] });
-      qc.invalidateQueries({ queryKey: ["dashboard-summary"] });
-      toast.success("Entry deleted");
-    },
-  });
-
   const filtered = useMemo(() => {
     return entries.filter((e) => {
       if (filterStart && (!e.pay_period_start || e.pay_period_start < filterStart)) return false;
@@ -105,7 +79,29 @@ function PayrollPage() {
     });
   }, [entries, filterStart, filterEnd]);
 
-  const total = filtered.reduce((s, e) => s + Number(e.gross_commission), 0);
+  const total = filtered.reduce((s, e) => s + Number(e.commission_amount ?? 0), 0);
+
+  const exportCsv = () => {
+    const escape = (value: string | number | null) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+    const rows = [
+      ["rep", "sale_id", "commission", "product_type", "status", "date"],
+      ...filtered.map((entry) => [
+        entry.rep_name,
+        entry.sale_id,
+        Number(entry.commission_amount ?? 0).toFixed(2),
+        entry.product_type,
+        entry.status,
+        entry.activation_date ?? entry.created_at.slice(0, 10),
+      ]),
+    ];
+    const blob = new Blob([rows.map((row) => row.map(escape).join(",")).join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `operator-payroll-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="max-w-7xl">
@@ -114,14 +110,9 @@ function PayrollPage() {
           <h1 className="text-3xl font-bold tracking-tight">Payroll</h1>
           <p className="text-muted-foreground mt-1">Weekly commissions by rep.</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="h-11" onClick={() => setSummaryOpen(true)}>
-            <FileText className="h-4 w-4 mr-2" /> Summary
-          </Button>
-          <Button className="h-11" onClick={() => { setEditing(null); setOpen(true); }}>
-            <Plus className="h-4 w-4 mr-2" /> Add Entry
-          </Button>
-        </div>
+        <Button variant="outline" className="h-11" onClick={exportCsv} disabled={filtered.length === 0}>
+          <Download className="h-4 w-4 mr-2" /> Export CSV
+        </Button>
       </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_1fr_auto] items-end border border-border rounded-lg p-4 bg-card">
@@ -144,40 +135,25 @@ function PayrollPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Rep Name</TableHead>
-                <TableHead className="text-right">Raw</TableHead>
-                <TableHead className="text-right">Activated</TableHead>
-                <TableHead className="text-right">Internet</TableHead>
-                <TableHead className="text-right">DirectTV</TableHead>
-                <TableHead>Period</TableHead>
-                <TableHead className="text-right">Gross</TableHead>
-                <TableHead className="w-24"></TableHead>
+                <TableHead>Sale</TableHead>
+                <TableHead>Product</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Commission</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 && (
-                <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No entries in this period.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No approved or activated sales in this period.</TableCell></TableRow>
               )}
               {filtered.map((e) => (
                 <TableRow key={e.id}>
                   <TableCell className="font-medium">{e.rep_name}</TableCell>
-                  <TableCell className="text-right text-muted-foreground">{e.raw_lines}</TableCell>
-                  <TableCell className="text-right">{e.activated_lines}</TableCell>
-                  <TableCell className="text-right">{e.internet_sales}</TableCell>
-                  <TableCell className="text-right">{e.directv_sales}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {fmtDate(e.pay_period_start)} – {fmtDate(e.pay_period_end)}
-                  </TableCell>
-                  <TableCell className="text-right font-semibold">${Number(e.gross_commission).toFixed(2)}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-1 justify-end">
-                      <Button size="icon" variant="ghost" aria-label={`Edit payroll entry for ${e.rep_name}`} onClick={() => { setEditing(e); setOpen(true); }}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" aria-label={`Delete payroll entry for ${e.rep_name}`} onClick={() => { if (confirm("Delete this entry?")) del.mutate(e.id); }}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+                  <TableCell className="font-mono text-xs">{e.sale_id ?? "Legacy"}</TableCell>
+                  <TableCell className="capitalize">{(e.product_type ?? "legacy").replaceAll("_", " ")}</TableCell>
+                  <TableCell>{e.status ?? "Legacy"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{fmtDate(e.activation_date ?? e.created_at)}</TableCell>
+                  <TableCell className="text-right font-semibold">${Number(e.commission_amount ?? 0).toFixed(2)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -188,9 +164,6 @@ function PayrollPage() {
           <span className="text-2xl font-bold">${total.toFixed(2)}</span>
         </div>
       </div>
-
-      <EntryDialog open={open} onOpenChange={setOpen} editing={editing} rates={rates} defaultPeriod={wk} />
-      <SummaryDialog open={summaryOpen} onOpenChange={setSummaryOpen} entries={filtered} start={filterStart} end={filterEnd} />
     </div>
   );
 }
