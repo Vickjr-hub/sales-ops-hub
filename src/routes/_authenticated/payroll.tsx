@@ -1,16 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/backend-client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pencil, Trash2, Plus, FileText } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import { Download } from "lucide-react";
+import { useMemo, useState } from "react";
 import { format, startOfWeek, endOfWeek, parseISO } from "date-fns";
 import { DatePickerField } from "@/components/DatePickerField";
 
@@ -32,25 +27,19 @@ export const Route = createFileRoute("/_authenticated/payroll")({
 
 type Entry = {
   id: string;
+  sale_id: string | null;
+  rep_id: string | null;
+  owner_id: string | null;
   rep_name: string;
-  raw_lines: number;
-  activated_lines: number;
-  internet_sales: number;
-  directv_sales: number;
-  gross_commission: number;
+  commission_amount: number | null;
+  product_type: string | null;
+  sale_value: number | null;
+  activation_date: string | null;
+  status: string | null;
+  created_at: string;
   pay_period_start: string | null;
   pay_period_end: string | null;
 };
-
-type Rates = { phone_line_rate: number; internet_rate: number; directv_rate: number };
-
-function calc(e: Pick<Entry, "activated_lines" | "internet_sales" | "directv_sales">, r: Rates) {
-  return (
-    Number(e.activated_lines) * Number(r.phone_line_rate) +
-    Number(e.internet_sales) * Number(r.internet_rate) +
-    Number(e.directv_sales) * Number(r.directv_rate)
-  );
-}
 
 function defaultWeek() {
   const now = new Date();
