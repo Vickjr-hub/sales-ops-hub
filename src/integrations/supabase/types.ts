@@ -286,35 +286,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      process_sale_status: {
-        Args: { _new_status: string; _sale_id: string }
-        Returns: {
-          activated_lines: number
-          activation_date: string | null
-          commission_amount: number | null
-          created_at: string
-          directv_sales: number
-          gross_commission: number
-          id: string
-          internet_sales: number
-          owner_id: string | null
-          pay_period_end: string | null
-          pay_period_start: string | null
-          product_type: string | null
-          raw_lines: number
-          rep_id: string | null
-          rep_name: string
-          sale_id: string | null
-          sale_value: number | null
-          status: string | null
-        }
-        SetofOptions: {
-          from: "*"
-          to: "payroll_entries"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
     }
     Enums: {
       app_role: "owner" | "rep"
