@@ -135,10 +135,10 @@ function SaleCard({
       </div>
 
       <div className="mt-4 flex flex-wrap justify-end gap-2">
-        <Button size="sm" variant="outline" disabled={sale.status === "Approved" || busy} onClick={onApprove}>
+        <Button size="sm" variant="outline" disabled={sale.status === "Approved" || sale.status === "Activated" || busy} onClick={onApprove}>
           <Check className="h-4 w-4" /> Approve
         </Button>
-        <Button size="sm" variant="outline" disabled={sale.status === "Rejected" || busy} onClick={onReject}>
+        <Button size="sm" variant="outline" disabled={sale.status === "Rejected" || sale.status === "Activated" || busy} onClick={onReject}>
           <X className="h-4 w-4" /> Reject
         </Button>
         <Button

@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
       { title: "Settings — Operator" },
-      { name: "description", content: "Update commission rates for phone lines, internet, and DirectTV. Existing payroll recalculates automatically." },
+      { name: "description", content: "Update commission rates for future phone line, internet, and DirecTV sale approvals." },
       { property: "og:title", content: "Settings — Operator" },
       { property: "og:description", content: "Manage commission rates used to calculate sales rep payroll." },
       { property: "og:url", content: "/settings" },
@@ -70,7 +70,7 @@ function SettingsPage() {
   return (
     <div className="max-w-xl">
       <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-      <p className="text-muted-foreground mt-1">Update commission rates. Existing payroll recalculates automatically.</p>
+      <p className="text-muted-foreground mt-1">Update commission rates used when sales are approved or activated.</p>
 
       <form
         onSubmit={(e) => { e.preventDefault(); save.mutate(); }}
