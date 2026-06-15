@@ -15,9 +15,9 @@ export const Route = createFileRoute("/_authenticated/payroll")({
   head: () => ({
     meta: [
       { title: "Payroll — Operator" },
-      { name: "description", content: "Calculate weekly commission payroll for your door-to-door sales reps and generate payroll summaries." },
+      { name: "description", content: "Review automatically generated sales commissions and export payroll records to CSV." },
       { property: "og:title", content: "Payroll — Operator" },
-      { property: "og:description", content: "Weekly commission payroll calculation and summaries for door-to-door sales teams." },
+      { property: "og:description", content: "Automatic sales commission payroll records for door-to-door telecom teams." },
       { property: "og:url", content: "/payroll" },
     ],
     links: [{ rel: "canonical", href: "/payroll" }],
@@ -108,7 +108,7 @@ function PayrollPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Payroll</h1>
-          <p className="text-muted-foreground mt-1">Weekly commissions by rep.</p>
+          <p className="text-muted-foreground mt-1">Automatically generated from approved and activated sales.</p>
         </div>
         <Button variant="outline" className="h-11" onClick={exportCsv} disabled={filtered.length === 0}>
           <Download className="h-4 w-4 mr-2" /> Export CSV
