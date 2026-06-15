@@ -52,7 +52,7 @@ function Dashboard() {
     queryFn: async () => {
       const [applicants, payroll] = await Promise.all([
         supabase.from("applicants").select("id, full_name, status, interview_date, interview_time"),
-        supabase.from("payroll_entries").select("gross_commission"),
+        supabase.from("payroll_entries").select("commission_amount"),
       ]);
       const apps = (applicants.data ?? []) as Applicant[];
       const pay = payroll.data ?? [];
@@ -67,7 +67,7 @@ function Dashboard() {
       return {
         activeReps: apps.filter((a) => a.status === "Hired").length,
         totalApplicants: apps.length,
-        payrollTotal: pay.reduce((s, p) => s + Number(p.gross_commission ?? 0), 0),
+        payrollTotal: pay.reduce((s, p) => s + Number(p.commission_amount ?? 0), 0),
         scheduledInterviews: apps.filter((a) => a.status === "Interview Scheduled").length,
         upcoming,
       };

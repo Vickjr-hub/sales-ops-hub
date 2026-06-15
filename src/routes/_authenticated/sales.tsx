@@ -40,13 +40,13 @@ type Sale = {
   notes: string | null;
   photo_url: string | null;
   sale_date: string;
-  status: "Pending" | "Approved" | "Rejected";
+  status: "Pending" | "Approved" | "Activated" | "Rejected";
   activation_status: "Pending Activation" | "Activated";
   created_at: string;
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const v = status === "Approved" ? "default" : status === "Rejected" ? "destructive" : "secondary";
+  const v = status === "Approved" || status === "Activated" ? "default" : status === "Rejected" ? "destructive" : "secondary";
   return <Badge variant={v as any}>{status}</Badge>;
 }
 
@@ -135,10 +135,10 @@ function SaleCard({
       </div>
 
       <div className="mt-4 flex flex-wrap justify-end gap-2">
-        <Button size="sm" variant="outline" disabled={sale.status === "Approved" || busy} onClick={onApprove}>
+        <Button size="sm" variant="outline" disabled={sale.status === "Approved" || sale.status === "Activated" || busy} onClick={onApprove}>
           <Check className="h-4 w-4" /> Approve
         </Button>
-        <Button size="sm" variant="outline" disabled={sale.status === "Rejected" || busy} onClick={onReject}>
+        <Button size="sm" variant="outline" disabled={sale.status === "Rejected" || sale.status === "Activated" || busy} onClick={onReject}>
           <X className="h-4 w-4" /> Reject
         </Button>
         <Button
@@ -214,11 +214,19 @@ function SalesReview() {
 
   const updateSale = useMutation({
     mutationFn: async (patch: { id: string; changes: Partial<Sale> }) => {
-      const { error } = await supabase.from("sales").update(patch.changes).eq("id", patch.id);
+      const { data, error } = await supabase
+        .from("sales")
+        .update(patch.changes)
+        .eq("id", patch.id)
+        .select("id, status, activation_status")
+        .single();
       if (error) throw error;
+      if (!data) throw new Error("The sale was not updated");
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["sales-all"] });
+      qc.invalidateQueries({ queryKey: ["payroll"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-summary"] });
     },
     onError: (e: any) => toast.error(e.message ?? "Update failed"),
   });
@@ -240,9 +248,9 @@ function SalesReview() {
       sale={s}
       repName={profileMap.get(s.rep_id) ?? "—"}
       busy={updateSale.isPending}
-      onApprove={() => updateSale.mutate({ id: s.id, changes: { status: "Approved" } }, { onSuccess: () => toast.success("Sale approved") })}
+      onApprove={() => updateSale.mutate({ id: s.id, changes: { status: "Approved" } }, { onSuccess: () => toast.success("Sale approved and payroll updated") })}
       onReject={() => updateSale.mutate({ id: s.id, changes: { status: "Rejected" } }, { onSuccess: () => toast.success("Sale rejected") })}
-      onActivate={() => updateSale.mutate({ id: s.id, changes: { activation_status: "Activated" } }, { onSuccess: () => toast.success("Sale marked activated") })}
+      onActivate={() => updateSale.mutate({ id: s.id, changes: { status: "Activated", activation_status: "Activated" } }, { onSuccess: () => toast.success("Sale activated and payroll updated") })}
       onViewPhoto={() => s.photo_url && viewPhoto(s.photo_url)}
     />
   );

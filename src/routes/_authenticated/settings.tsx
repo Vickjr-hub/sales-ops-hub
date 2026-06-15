@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
       { title: "Settings — Operator" },
-      { name: "description", content: "Update commission rates for phone lines, internet, and DirectTV. Existing payroll recalculates automatically." },
+      { name: "description", content: "Update commission rates for future phone line, internet, and DirecTV sale approvals." },
       { property: "og:title", content: "Settings — Operator" },
       { property: "og:description", content: "Manage commission rates used to calculate sales rep payroll." },
       { property: "og:url", content: "/settings" },
@@ -57,28 +57,12 @@ function SettingsPage() {
         const { error } = await supabase.from("settings").insert(form);
         if (error) throw error;
       }
-      // Recalculate every payroll entry with the new rates.
-      const { data: entries, error: eErr } = await supabase
-        .from("payroll_entries")
-        .select("id, activated_lines, internet_sales, directv_sales");
-      if (eErr) throw eErr;
-      for (const e of entries ?? []) {
-        const gross =
-          Number(e.activated_lines) * form.phone_line_rate +
-          Number(e.internet_sales) * form.internet_rate +
-          Number(e.directv_sales) * form.directv_rate;
-        const { error: uErr } = await supabase
-          .from("payroll_entries")
-          .update({ gross_commission: gross })
-          .eq("id", e.id);
-        if (uErr) throw uErr;
-      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["settings"] });
       qc.invalidateQueries({ queryKey: ["payroll"] });
       qc.invalidateQueries({ queryKey: ["dashboard-summary"] });
-      toast.success("Settings saved. Payroll recalculated.");
+      toast.success("Settings saved. New approvals will use these rates.");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -86,7 +70,7 @@ function SettingsPage() {
   return (
     <div className="max-w-xl">
       <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-      <p className="text-muted-foreground mt-1">Update commission rates. Existing payroll recalculates automatically.</p>
+      <p className="text-muted-foreground mt-1">Update commission rates used when sales are approved or activated.</p>
 
       <form
         onSubmit={(e) => { e.preventDefault(); save.mutate(); }}
