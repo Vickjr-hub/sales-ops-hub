@@ -6,11 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
+import { Checkbox } from "@/components/ui/checkbox";
 import { OwnerOnly } from "@/components/OwnerOnly";
 
-export const Route = createFileRoute("/_authenticated/settings")({
-  head: () => ({
+export const Route = createFileRoute("/_authenticated/settings")({  head: () => ({
     meta: [
       { title: "Settings — Operator" },
       { name: "description", content: "Update commission rates for future phone line, internet, and DirecTV sale approvals." },
@@ -23,11 +22,24 @@ export const Route = createFileRoute("/_authenticated/settings")({
   component: () => <OwnerOnly><SettingsPage /></OwnerOnly>,
 });
 
-type Settings = { id: string; phone_line_rate: number; internet_rate: number; directv_rate: number };
+type Settings = {
+  id: string;
+  phone_line_rate: number;
+  internet_rate: number;
+  directv_rate: number;
+  groupme_webhook_url?: string | null;
+  webhook_enabled?: boolean;
+};
 
 function SettingsPage() {
   const qc = useQueryClient();
-  const [form, setForm] = useState({ phone_line_rate: 200, internet_rate: 0, directv_rate: 50 });
+  const [form, setForm] = useState({
+    phone_line_rate: 200,
+    internet_rate: 0,
+    directv_rate: 50,
+    groupme_webhook_url: '',
+    webhook_enabled: false,
+  });
 
   const { data } = useQuery({
     queryKey: ["settings"],
@@ -44,6 +56,8 @@ function SettingsPage() {
         phone_line_rate: Number(data.phone_line_rate),
         internet_rate: Number(data.internet_rate),
         directv_rate: Number(data.directv_rate),
+        groupme_webhook_url: data.groupme_webhook_url || '',
+        webhook_enabled: data.webhook_enabled || false,
       });
     }
   }, [data]);
@@ -70,7 +84,7 @@ function SettingsPage() {
   return (
     <div className="max-w-xl">
       <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-      <p className="text-muted-foreground mt-1">Update commission rates used when sales are approved or activated.</p>
+      <p className="text-muted-foreground mt-1">Update commission rates and webhook configuration.</p>
 
       <form
         onSubmit={(e) => { e.preventDefault(); save.mutate(); }}
@@ -80,22 +94,49 @@ function SettingsPage() {
           <Label>Phone Line Rate ($)</Label>
           <Input type="number" step="0.01" min={0} value={form.phone_line_rate}
             onChange={(e) => setForm({ ...form, phone_line_rate: Number(e.target.value) })} />
-          <p className="text-xs text-muted-foreground">Paid per activated line.</p>
         </div>
         <div className="space-y-2">
           <Label>Internet Rate ($)</Label>
           <Input type="number" step="0.01" min={0} value={form.internet_rate}
             onChange={(e) => setForm({ ...form, internet_rate: Number(e.target.value) })} />
-          <p className="text-xs text-muted-foreground">Paid per internet sale.</p>
         </div>
         <div className="space-y-2">
-          <Label>DirectTV Rate ($)</Label>
+          <Label>DirecTV Rate ($)</Label>
           <Input type="number" step="0.01" min={0} value={form.directv_rate}
             onChange={(e) => setForm({ ...form, directv_rate: Number(e.target.value) })} />
-          <p className="text-xs text-muted-foreground">Paid per DirectTV sale.</p>
         </div>
-        <Button type="submit" className="h-11 w-full" disabled={save.isPending}>
-          {save.isPending ? "Saving..." : "Save Changes"}
+
+        <div className="border-t border-border pt-4 mt-6">
+          <h2 className="text-lg font-semibold mb-4">Webhook Integration (Optional)</h2>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="webhook-enabled"
+                checked={form.webhook_enabled}
+                onCheckedChange={(checked) =>
+                  setForm({ ...form, webhook_enabled: checked as boolean })
+                }
+              />
+              <Label htmlFor="webhook-enabled" className="cursor-pointer">Enable webhook notifications</Label>
+            </div>
+            {form.webhook_enabled && (
+              <div className="space-y-2">
+                <Label htmlFor="webhook-url">Webhook URL (GroupMe or custom)</Label>
+                <Input
+                  id="webhook-url"
+                  type="url"
+                  placeholder="https://api.groupme.com/v3/bots/post?token=..."
+                  value={form.groupme_webhook_url}
+                  onChange={(e) => setForm({ ...form, groupme_webhook_url: e.target.value })}
+                />
+                <p className="text-xs text-muted-foreground">Sales submissions will be posted to this URL.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <Button type="submit" disabled={save.isPending} className="w-full">
+          {save.isPending ? "Saving..." : "Save Settings"}
         </Button>
       </form>
     </div>

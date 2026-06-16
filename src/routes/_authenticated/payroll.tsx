@@ -59,7 +59,7 @@ function PayrollPage() {
   const [filterStart, setFilterStart] = useState<string | null>(wk.start);
   const [filterEnd, setFilterEnd] = useState<string | null>(wk.end);
 
-  const { data: entries = [] } = useQuery({
+  const { data: entries = [], isLoading } = useQuery({
     queryKey: ["payroll"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -67,8 +67,9 @@ function PayrollPage() {
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as Entry[];
+      return (data as Entry[]) || [];
     },
+    staleTime: 5_000,
   });
 
   const filtered = useMemo(() => {
@@ -110,7 +111,7 @@ function PayrollPage() {
           <h1 className="text-3xl font-bold tracking-tight">Payroll</h1>
           <p className="text-muted-foreground mt-1">Automatically generated from approved and activated sales.</p>
         </div>
-        <Button variant="outline" className="h-11" onClick={exportCsv} disabled={filtered.length === 0}>
+        <Button variant="outline" className="h-11" onClick={exportCsv} disabled={filtered.length === 0 || isLoading}>
           <Download className="h-4 w-4 mr-2" /> Export CSV
         </Button>
       </div>
@@ -143,7 +144,10 @@ function PayrollPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.length === 0 && (
+              {isLoading && (
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Loading payroll data...</TableCell></TableRow>
+              )}
+              {!isLoading && filtered.length === 0 && (
                 <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No approved or activated sales in this period.</TableCell></TableRow>
               )}
               {filtered.map((e) => (
@@ -167,4 +171,3 @@ function PayrollPage() {
     </div>
   );
 }
-

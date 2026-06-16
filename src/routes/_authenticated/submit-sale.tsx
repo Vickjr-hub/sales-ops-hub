@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/backend-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import { useRole } from "@/hooks/useRole";
 import { RepOnly } from "@/components/OwnerOnly";
 import { Check, Copy } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { triggerWebhook } from "@/lib/webhooks";
 
 export const Route = createFileRoute("/_authenticated/submit-sale")({
   head: () => ({
@@ -41,7 +42,7 @@ type Submitted = {
 };
 
 function SubmitSale() {
-  const { userId } = useRole();
+  const { userId, fullName } = useRole();
   const qc = useQueryClient();
 
   const [customerName, setCustomerName] = useState("");
@@ -53,6 +54,14 @@ function SubmitSale() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [saleDate, setSaleDate] = useState<string>(today());
   const [submitted, setSubmitted] = useState<Submitted | null>(null);
+
+  const { data: settings } = useQuery({
+    queryKey: ["settings"],
+    queryFn: async () => {
+      const { data } = await supabase.from("settings").select("*").limit(1).maybeSingle();
+      return data;
+    },
+  });
 
   const reset = () => {
     setCustomerName(""); setSpmNumber(""); setLines(1);
@@ -80,7 +89,7 @@ function SubmitSale() {
       });
       if (upErr) throw new Error(`Photo upload failed: ${upErr.message}`);
 
-      const { error } = await supabase.from("sales").insert({
+      const { data: insertData, error } = await supabase.from("sales").insert({
         rep_id: userId,
         customer_name: trimmedName,
         spm_number: trimmedSpm,
@@ -90,11 +99,31 @@ function SubmitSale() {
         notes: notes.trim() || null,
         photo_url: path,
         sale_date: saleDate,
-      });
+        status: "Pending",
+        activation_status: "Pending Activation",
+      }).select("id").single();
+
       if (error) {
-        // Clean up orphaned photo so storage doesn't accumulate junk
         await supabase.storage.from("sale-photos").remove([path]).catch(() => {});
         throw new Error(`Could not save sale: ${error.message}`);
+      }
+
+      // Trigger webhook if enabled
+      if (settings?.webhook_enabled && settings?.groupme_webhook_url) {
+        const now = new Date().toISOString();
+        triggerWebhook({
+          event: 'sale_submitted',
+          sale_id: insertData?.id || '',
+          rep_name: fullName || 'Unknown Rep',
+          customer_name: trimmedName,
+          spm_number: trimmedSpm,
+          lines,
+          sale_type: saleType,
+          package_type: packageType,
+          sale_date: saleDate,
+          status: 'Pending',
+          timestamp: now,
+        }, settings.groupme_webhook_url).catch(() => {});
       }
 
       return {
