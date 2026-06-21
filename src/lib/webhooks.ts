@@ -17,6 +17,25 @@ export type WebhookPayload = {
 export async function triggerWebhook(payload: WebhookPayload, webhookUrl: string): Promise<boolean> {
   if (!webhookUrl) return false;
 
+  const logAttempt = async (row: {
+    response_status: number | null;
+    response_body: string | null;
+    success: boolean;
+  }) => {
+    try {
+      await supabase.from('webhook_logs').insert({
+        sale_id: payload.sale_id,
+        webhook_url: webhookUrl,
+        payload: payload as unknown as Record<string, unknown>,
+        response_status: row.response_status,
+        response_body: row.response_body,
+        success: row.success,
+      });
+    } catch {
+      // swallow logging errors
+    }
+  };
+
   try {
     const response = await fetch(webhookUrl, {
       method: 'POST',
@@ -27,28 +46,20 @@ export async function triggerWebhook(payload: WebhookPayload, webhookUrl: string
     const success = response.ok;
     const responseBody = await response.text().catch(() => '');
 
-    // Log webhook attempt
-    await supabase.from('webhook_logs').insert({
-      sale_id: payload.sale_id,
-      webhook_url: webhookUrl,
-      payload,
+    await logAttempt({
       response_status: response.status,
       response_body: responseBody || null,
       success,
-    }).catch(() => {});
+    });
 
     return success;
   } catch (error) {
-    // Log error
-    await supabase.from('webhook_logs').insert({
-      sale_id: payload.sale_id,
-      webhook_url: webhookUrl,
-      payload,
+    await logAttempt({
       response_status: null,
       response_body: error instanceof Error ? error.message : 'Unknown error',
       success: false,
-    }).catch(() => {});
-
+    });
     return false;
   }
 }
+
