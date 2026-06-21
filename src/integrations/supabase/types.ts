@@ -199,21 +199,27 @@ export type Database = {
       settings: {
         Row: {
           directv_rate: number
+          groupme_webhook_url: string
           id: string
           internet_rate: number
           phone_line_rate: number
+          webhook_enabled: boolean
         }
         Insert: {
           directv_rate?: number
+          groupme_webhook_url?: string
           id?: string
           internet_rate?: number
           phone_line_rate?: number
+          webhook_enabled?: boolean
         }
         Update: {
           directv_rate?: number
+          groupme_webhook_url?: string
           id?: string
           internet_rate?: number
           phone_line_rate?: number
+          webhook_enabled?: boolean
         }
         Relationships: []
       }
@@ -273,6 +279,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      webhook_logs: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          response_body: string | null
+          response_status: number | null
+          sale_id: string | null
+          success: boolean
+          webhook_url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload: Json
+          response_body?: string | null
+          response_status?: number | null
+          sale_id?: string | null
+          success?: boolean
+          webhook_url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          response_body?: string | null
+          response_status?: number | null
+          sale_id?: string | null
+          success?: boolean
+          webhook_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_logs_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

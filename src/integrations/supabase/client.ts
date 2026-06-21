@@ -3,11 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 function createSupabaseClient() {
-  // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
-const SUPABASE_URL = "https://pmdifpwrgxfklfvgbqec.supabase.co";
+  const SUPABASE_URL =
+    (import.meta.env.VITE_SUPABASE_URL as string | undefined) ||
+    (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined);
 
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBtZGlmcHdyZ3hma2xmdmdicWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NDA2MTYsImV4cCI6MjA5NjExNjYxNn0.oSyVcCdW26r6nnkS1_L8m5r59o8pBalyf8HjneHOraQ";
+  const SUPABASE_PUBLISHABLE_KEY =
+    (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ||
+    (typeof process !== 'undefined' ? process.env.SUPABASE_PUBLISHABLE_KEY : undefined);
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
@@ -38,4 +40,3 @@ export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>,
     return Reflect.get(_supabase, prop, receiver);
   },
 });
-
