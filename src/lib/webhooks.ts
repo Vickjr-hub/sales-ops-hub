@@ -26,7 +26,7 @@ export async function triggerWebhook(payload: WebhookPayload, webhookUrl: string
       await supabase.from('webhook_logs').insert({
         sale_id: payload.sale_id,
         webhook_url: webhookUrl,
-        payload: payload as unknown as Record<string, unknown>,
+        payload: payload as unknown as import('@/integrations/supabase/types').Json,
         response_status: row.response_status,
         response_body: row.response_body,
         success: row.success,
